@@ -1,0 +1,50 @@
+{
+  "ashokvp04@gmail.com": {
+    "fullName": "asdfghjkl",
+    "email": "ashokvp04@gmail.com",
+    "company": "project",
+    "reason": "",
+    "status": "approved",
+    "createdAt": "2026-08-04T10:30:14.054Z"
+  },
+  "test-personal@gmail.com": {
+    "fullName": "Test Personal User",
+    "email": "test-personal@gmail.com",
+    "company": "Rudratic Demo",
+    "reason": "",
+    "status": "approved",
+    "createdAt": "2026-08-05T13:09:58.708Z"
+  },
+  "ashokrudratic@gmail.com": {
+    "fullName": "ashok",
+    "email": "ashokrudratic@gmail.com",
+    "company": "asdfghjkl;",
+    "reason": "",
+    "status": "approved",
+    "createdAt": "2026-08-06T05:55:50.482Z"
+  },
+  "ashokcse2004@gmail.com": {
+    "fullName": "ashok",
+    "email": "ashokcse2004@gmail.com",
+    "company": "234567890-",
+    "reason": "",
+    "status": "approved",
+    "createdAt": "2026-08-06T06:33:35.795Z"
+  },
+  "ashokibm23@gmail.com": {
+    "fullName": "ashok",
+    "email": "ashokibm23@gmail.com",
+    "company": "ashok",
+    "reason": "",
+    "status": "approved",
+    "createdAt": "2026-08-06T06:56:19.147Z"
+  },
+  "ashokim23@gmail.com": {
+    "fullName": "sdf",
+    "email": "ashokim23@gmail.com",
+    "company": "qwertyuio",
+    "reason": "",
+    "status": "pending",
+    "createdAt": "2026-08-06T06:57:42.884Z"
+  }
+}

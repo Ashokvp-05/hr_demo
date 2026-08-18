@@ -1,0 +1,10 @@
+{
+  "name": "swot-hr-unified",
+  "version": "1.0.0",
+  "scripts": {
+    "build:frontend": "cd frontend && npm install && npm run build",
+    "build:backend": "cd backend && npm install && npm run build",
+    "build:all": "npm run build:frontend && npm run build:backend",
+    "pack": "npm run build:all && xcopy /E /I frontend\\.next\\standalone FINAL_RELEASE\\frontend && xcopy /E /I frontend\\.next\\static FINAL_RELEASE\\frontend\\.next\\static && xcopy /E /I frontend\\public FINAL_RELEASE\\frontend\\public && xcopy /E /I backend\\dist FINAL_RELEASE\\backend && copy IIS-Deployment\\backend_web.config FINAL_RELEASE\\backend\\web.config"
+  }
+}

@@ -1,0 +1,145 @@
+# ─── Networks ─────────────────────────────────────────────────────────────────
+# All services share an isolated internal network.
+# The database is NOT exposed to the host — only the app ports are published.
+networks:
+  hr_demo_net:
+    driver: bridge
+
+# ─── Volumes ──────────────────────────────────────────────────────────────────
+# External name keeps data alive across `docker compose down` restarts.
+# Only `docker compose down -v` (or manual `docker volume rm`) will remove it.
+volumes:
+  postgres_data:
+    name: hr_demo_postgres_data
+
+services:
+
+  # ── PostgreSQL Database ──────────────────────────────────────────────────────
+  db:
+    image: postgres:15-alpine
+    container_name: hr_demo_db
+    restart: unless-stopped
+    networks:
+      - hr_demo_net
+    environment:
+      POSTGRES_DB:       hr_demo
+      POSTGRES_USER:     hr_demo
+      POSTGRES_PASSWORD: hr_demo_secret
+      # Tune shared memory for better performance
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
+      PGDATA: /var/lib/postgresql/data/pgdata
+    command: >
+      postgres
+        -c shared_buffers=256MB
+        -c effective_cache_size=512MB
+        -c work_mem=16MB
+        -c maintenance_work_mem=64MB
+        -c max_connections=100
+        -c wal_compression=on
+        -c synchronous_commit=off
+        -c checkpoint_completion_target=0.9
+        -c random_page_cost=1.1
+        -c effective_io_concurrency=200
+        -c log_min_duration_statement=1000
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U hr_demo -d hr_demo"]
+      interval: 5s
+      timeout: 5s
+      retries: 15
+      start_period: 15s
+    # db is intentionally NOT published to the host.
+    # Only the app container can reach it via the internal network.
+
+  # ── Database Migration & Seeding ──────────────────────────────────────────────
+  # Runs once on every `docker compose up` and exits.
+  # Fully idempotent: safe to run on existing data.
+  migrate:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: hr_demo_migrate
+    restart: "no"
+    networks:
+      - hr_demo_net
+    environment:
+      DATABASE_URL: postgresql://hr_demo:hr_demo_secret@db:5432/hr_demo?schema=public
+      NODE_ENV:     production
+    command: >
+      sh -c "
+        echo 'Waiting for PostgreSQL to accept connections...' &&
+        until pg_isready -h db -U hr_demo -d hr_demo; do
+          echo 'Still waiting...' && sleep 2;
+        done &&
+        echo 'Running database migrations and seed...' &&
+        npx prisma db push --accept-data-loss &&
+        node prisma/seed.js &&
+        echo 'Migration and seeding complete.'
+      "
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # ── Express Backend Application ──────────────────────────────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: hr_demo_backend
+    restart: unless-stopped
+    command: node dist/server.js
+    networks:
+      - hr_demo_net
+    ports:
+      - "127.0.0.1:4007:4000"
+    environment:
+      DATABASE_URL:         postgresql://hr_demo:hr_demo_secret@db:5432/hr_demo?schema=public
+      PORT:                 4000
+      NODE_ENV:             production
+      NODE_OPTIONS:         --max-old-space-size=512
+      JWT_SECRET:           ${JWT_SECRET:-hr_system_secret_key_2026}
+      ADMIN_APPROVE_SECRET: ${ADMIN_APPROVE_SECRET:-rudratic-admin-2026}
+      CORS_ORIGINS:         https://hr.swotpam.com,http://localhost:8085,http://localhost:4007,http://127.0.0.1:8085
+      FRONTEND_URL:         https://hr.swotpam.com
+      SMTP_SERVER:          ${SMTP_SERVER:-mail.rudratic.com}
+      SMTP_PORT:            ${SMTP_PORT:-587}
+      SMTP_USERNAME:        ${SMTP_USERNAME:-alert@rudratic.com}
+      SMTP_PASSWORD:        ${SMTP_PASSWORD:-}
+      SENDER_EMAIL:         ${SENDER_EMAIL:-noreply@rudratic.com}
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:4000/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    depends_on:
+      db:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+
+  # ── Next.js Frontend Application ─────────────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: /api
+    container_name: hr_demo_frontend
+    restart: unless-stopped
+    networks:
+      - hr_demo_net
+    ports:
+      - "8085:3000"
+    environment:
+      INTERNAL_BACKEND_URL: http://backend:4000
+      NODE_ENV:             production
+      NODE_OPTIONS:         --max-old-space-size=512
+      AUTH_SECRET:          ${AUTH_SECRET:-hr_system_auth_secret_2026}
+      AUTH_TRUST_HOST:      "true"
+      AUTH_URL:             https://hr.swotpam.com
+      NEXTAUTH_URL:         https://hr.swotpam.com
+    depends_on:
+      backend:
+        condition: service_healthy

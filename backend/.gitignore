@@ -1,0 +1,26 @@
+# Dependencies
+node_modules/
+
+# Build
+dist/
+
+# Environment Variables
+.env
+.env.*
+!.env.example
+
+# Database
+prisma/dev.db
+prisma/migrations/*.sql
+prisma/schema.prisma.bak
+
+# Logs
+*.log
+npm-debug.log*
+
+# Uploads
+uploads/
+
+# OS
+.DS_Store
+Thumbs.db
