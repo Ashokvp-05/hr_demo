@@ -100,8 +100,8 @@ services:
       NODE_OPTIONS:         --max-old-space-size=512
       JWT_SECRET:           ${JWT_SECRET:-hr_system_secret_key_2026}
       ADMIN_APPROVE_SECRET: ${ADMIN_APPROVE_SECRET:-rudratic-admin-2026}
-      CORS_ORIGINS:         https://hr.swotpam.com,http://localhost:8085,http://localhost:4007,http://127.0.0.1:8085
-      FRONTEND_URL:         https://hr.swotpam.com
+      CORS_ORIGINS:         http://192.168.1.11:8085,http://localhost:8085,http://localhost:4007,http://127.0.0.1:8085
+      FRONTEND_URL:         http://192.168.1.11:8085
       SMTP_SERVER:          ${SMTP_SERVER:-mail.rudratic.com}
       SMTP_PORT:            ${SMTP_PORT:-587}
       SMTP_USERNAME:        ${SMTP_USERNAME:-alert@rudratic.com}
@@ -138,8 +138,8 @@ services:
       NODE_OPTIONS:         --max-old-space-size=512
       AUTH_SECRET:          ${AUTH_SECRET:-hr_system_auth_secret_2026}
       AUTH_TRUST_HOST:      "true"
-      AUTH_URL:             https://hr.swotpam.com
-      NEXTAUTH_URL:         https://hr.swotpam.com
+      AUTH_URL:             http://192.168.1.11:8085
+      NEXTAUTH_URL:         http://192.168.1.11:8085
     depends_on:
       backend:
         condition: service_healthy
