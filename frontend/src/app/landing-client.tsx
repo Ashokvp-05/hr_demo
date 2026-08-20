@@ -21,7 +21,7 @@ export default function LandingClient() {
     const [email, setEmail] = useState("")
     const [otp, setOtp] = useState("")
     const [step, setStep] = useState<"welcome" | "business_details" | "verify" | "access_request" | "access_pending" | "select_role">(
-        searchParams.get("preview") === "role" ? "welcome" : "business_details"
+        "welcome"
     )
     const [tempToken, setTempToken] = useState<string | null>(null)
     const [isLoading, setIsLoading] = useState(false)
