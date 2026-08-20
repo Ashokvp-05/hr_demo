@@ -52,34 +52,6 @@ services:
     # db is intentionally NOT published to the host.
     # Only the app container can reach it via the internal network.
 
-  # ── Database Migration & Seeding ──────────────────────────────────────────────
-  # Runs once on every `docker compose up` and exits.
-  # Fully idempotent: safe to run on existing data.
-  migrate:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
-    container_name: hr_demo_migrate
-    restart: "no"
-    networks:
-      - hr_demo_net
-    environment:
-      DATABASE_URL: postgresql://hr_demo:hr_demo_secret@db:5432/hr_demo?schema=public
-      NODE_ENV:     production
-    command: >
-      sh -c "
-        echo 'Waiting for PostgreSQL to accept connections...' &&
-        until pg_isready -h db -U hr_demo -d hr_demo; do
-          echo 'Still waiting...' && sleep 2;
-        done &&
-        echo 'Running database migrations and seed...' &&
-        npx prisma db push --accept-data-loss &&
-        node prisma/seed.js &&
-        echo 'Migration and seeding complete.'
-      "
-    depends_on:
-      db:
-        condition: service_healthy
 
   # ── Express Backend Application ──────────────────────────────────────────────
   backend:
@@ -116,8 +88,6 @@ services:
     depends_on:
       db:
         condition: service_healthy
-      migrate:
-        condition: service_completed_successfully
 
   # ── Next.js Frontend Application ─────────────────────────────────────────────
   frontend:
