@@ -92,6 +92,22 @@ const nextConfig: NextConfig = {
           source: '/ws',
           destination: `${backendUrl}/ws`,
         },
+        {
+          source: '/api/auth/request-otp',
+          destination: `${backendUrl}/api/auth/request-otp`,
+        },
+        {
+          source: '/api/auth/verify-otp',
+          destination: `${backendUrl}/api/auth/verify-otp`,
+        },
+        {
+          source: '/api/auth/request-access',
+          destination: `${backendUrl}/api/auth/request-access`,
+        },
+        {
+          source: '/api/auth/update-role',
+          destination: `${backendUrl}/api/auth/update-role`,
+        },
       ],
       fallback: [
         {
