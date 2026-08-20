@@ -21,7 +21,7 @@ export default function LandingClient() {
     const [email, setEmail] = useState("")
     const [otp, setOtp] = useState("")
     const [step, setStep] = useState<"welcome" | "business_details" | "verify" | "access_request" | "access_pending" | "select_role">(
-        "welcome"
+        searchParams.get("preview") === "role" ? "welcome" : "business_details"
     )
     const [tempToken, setTempToken] = useState<string | null>(null)
     const [isLoading, setIsLoading] = useState(false)
@@ -170,7 +170,7 @@ export default function LandingClient() {
             if (!res.ok) throw new Error(data.message || data.error || "Failed to verify OTP")
 
             const userRole = data.user?.role?.toUpperCase()
-            const intent = selectedRoleIntent || (userRole === "EMPLOYEE" ? "EMPLOYEE" : null)
+            const intent = selectedRoleIntent || null
 
             if (intent === "EMPLOYEE") {
                 if (userRole !== "EMPLOYEE") {
